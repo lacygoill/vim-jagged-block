@@ -20,9 +20,11 @@ By default, the expansion ends right before the character you've pressed.  If in
 
 You can also expand backward.  Before entering the "VISUAL JAGGED BLOCK" mode, make sure your cursor controls the bottom-left or top-left corner of the visual block.
 
+![gif](https://user-images.githubusercontent.com/8505073/106329837-6f72d800-6282-11eb-82ef-4d0144180eaa.gif)
+
 ## Customization
 
-You can change the key to enter "VISUAL JAGGED BLOCK" mode like this:
+You can change the key to enter the "VISUAL JAGGED BLOCK" mode like this:
 
     xmap <key> <plug>(jagged-block)
 
