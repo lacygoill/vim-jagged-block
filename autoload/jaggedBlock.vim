@@ -1,5 +1,8 @@
 vim9 noclear
 
+if exists('loaded') | finish | endif
+var loaded = true
+
 # Config {{{1
 
 const SHOWMODE: string = '-- VISUAL JAGGED BLOCK --'
