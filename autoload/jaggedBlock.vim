@@ -144,10 +144,9 @@ def EqualizeBlock() #{{{2
         var n: number = longest - shortest
         for coords in jagged_block
             var pat: string = '\%' .. coords.start_col .. 'c'
-            var text: string = coords.lnum
-                ->getline()
+            getline(coords.lnum)
                 ->substitute(pat, repeat(' ', n), '')
-            setline(coords.lnum, text)
+                ->setline(coords.lnum)
         endfor
         var lnum: number = jagged_block[0].lnum
         var col: number = jagged_block[0].end_col + longest - shortest
@@ -160,10 +159,9 @@ def EqualizeBlock() #{{{2
         for coords in jagged_block
             var n: number = longest - LineInBlockLength(coords)
             var pat: string = '\%' .. coords.end_col .. 'c.\zs'
-            var text: string = coords.lnum
-                ->getline()
+            getline(coords.lnum)
                 ->substitute(pat, repeat(' ', n), '')
-            setline(coords.lnum, text)
+                ->setline(coords.lnum)
         endfor
         var lnum: number = jagged_block[0].lnum
         var col: number = jagged_block[0].start_col
