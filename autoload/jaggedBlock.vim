@@ -177,7 +177,7 @@ def RemoveTrailingSpaces() #{{{2
     getreginfo('"')
         ->extend({
             regcontents: getreg('"', true, true)
-                            ->map((_, v) => v->trim()),
+                            ->map((_, v) => v->trim(' ', 2)),
             regtype: 'b1',
         })->setreg('"')
 enddef
