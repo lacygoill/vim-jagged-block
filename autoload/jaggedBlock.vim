@@ -11,8 +11,8 @@ const SHOWMODE: string = '-- VISUAL JAGGED BLOCK --'
 
 var curbuf: number
 var exclusive: bool = true
-var jagged_block: list<dict<number>>
 var expand_backward: bool
+var jagged_block: list<dict<number>>
 var popup_bufnr: number
 
 # Interface {{{1
@@ -50,7 +50,6 @@ def jaggedBlock#mapping() #{{{2
         callback: function(ClearJaggedBlock, [false]),
         })->winbufnr()
 enddef
-
 #}}}1
 # Core {{{1
 def UpdateHighlighting(key = '') #{{{2
@@ -111,6 +110,36 @@ def Filter(winid: number, key: string): bool #{{{2
             # If we've expanded backward, we've inserted spaces to equalize the block.{{{
             #
             # They need to be removed.
+            #}}}
+            # Why a nested autocmd?{{{
+            #
+            # `EqualizeBlock()` has  invoked `setline()`, which for  some reason
+            # causes  `TextChanged` to  be  fired, even  though  the autocmd  is
+            # installed later:
+            #
+            #     vim9
+            #     setline(1, '')
+            #     au TextChanged * echom 'TextChanged was fired'
+            #
+            # We need to ignore this `TextChanged` event, and wait for the next
+            # one which will be fired when `feedkeys()` will have pressed `c` or `d`.
+            #
+            # ---
+            #
+            # Note  that it  doesn't matter  that `setline()`  might be  invoked
+            # several times, the event is fired only once:
+            #
+            #     vim9
+            #     setline(1, '')
+            #     setline(1, '')
+            #     setline(1, '')
+            #     au TextChanged * echom 'TextChanged was fired'
+            #
+            # ---
+            #
+            # It's not a Vim9 bug.
+            # It's not specific to `setline()` (can also be reproduced with `:norm! ii`).
+            # `:noa` does not suppress the event here.
             #}}}
             au TextChanged * ++once au TextChanged * ++once RemoveHeadingSpaces()
         else
