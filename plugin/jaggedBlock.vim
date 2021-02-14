@@ -1,4 +1,4 @@
-vim9 noclear
+vim9script noclear
 
 if exists('loaded')
     # need Vim 8.2.2257 or higher
