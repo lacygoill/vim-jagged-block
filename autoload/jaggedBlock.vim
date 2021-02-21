@@ -167,10 +167,10 @@ enddef
 
 def EqualizeBlock() #{{{2
     var shortest: number = jagged_block
-        ->mapnew((_, v) => LineInBlockLength(v))
+        ->mapnew((_, v: dict<number>): number => LineInBlockLength(v))
         ->min()
     var longest: number = jagged_block
-        ->mapnew((_, v) => LineInBlockLength(v))
+        ->mapnew((_, v: dict<number>): number => LineInBlockLength(v))
         ->max()
     if expand_backward
         var n: number = longest - shortest
@@ -209,7 +209,7 @@ def RemoveTrailingSpaces() #{{{2
     getreginfo('"')
         ->extend({
             regcontents: getreg('"', true, true)
-                            ->map((_, v) => v->trim(' ', 2)),
+                            ->map((_, v: string): string => v->trim(' ', 2)),
             regtype: 'b1',
         })->setreg('"')
 enddef
@@ -223,11 +223,12 @@ def RemoveHeadingSpaces() #{{{2
 enddef
 
 def GetJaggedBlock(): list<string> #{{{2
-    return jagged_block->mapnew((_, v) =>
-        v.lnum
-        ->getline()
-        ->matchstr('\%' .. v.start_col .. 'c.*\%' .. v.end_col .. 'c.')
-        )
+    return jagged_block
+        ->mapnew((_, v: dict<number>): string =>
+            v.lnum
+            ->getline()
+            ->matchstr('\%' .. v.start_col .. 'c.*\%' .. v.end_col .. 'c.')
+            )
 enddef
 
 def PopupGetText(): string #{{{2
