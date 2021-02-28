@@ -180,11 +180,11 @@ def EqualizeBlock() #{{{2
                 ->substitute(pat, repeat(' ', n), '')
                 ->setline(coords.lnum)
         endfor
-        var lnum: number = jagged_block[0].lnum
-        var col: number = jagged_block[0].end_col + longest - shortest
+        var lnum: number = jagged_block[0]['lnum']
+        var col: number = jagged_block[0]['end_col'] + longest - shortest
         cursor(lnum, col)
         exe "norm! \<c-v>"
-        lnum = jagged_block[-1].lnum
+        lnum = jagged_block[-1]['lnum']
         cursor(lnum, col)
         exe 'norm! ' .. (longest == 1 ? '' : (longest - 1) .. 'h')
     else
@@ -195,11 +195,11 @@ def EqualizeBlock() #{{{2
                 ->substitute(pat, repeat(' ', n), '')
                 ->setline(coords.lnum)
         endfor
-        var lnum: number = jagged_block[0].lnum
-        var col: number = jagged_block[0].start_col
+        var lnum: number = jagged_block[0]['lnum']
+        var col: number = jagged_block[0]['start_col']
         cursor(lnum, col)
         exe "norm! \<c-v>"
-        lnum = jagged_block[-1].lnum
+        lnum = jagged_block[-1]['lnum']
         cursor(lnum, col)
         exe 'norm! ' .. (longest == 1 ? '' : (longest - 1) .. 'l')
     endif
@@ -236,8 +236,8 @@ def PopupGetText(): string #{{{2
 enddef
 
 def ClearJaggedBlock(reinstall_proptype = false, ...l: any) #{{{2
-    var lnum_start: number = jagged_block[0].lnum
-    var lnum_end: number = jagged_block[-1].lnum
+    var lnum_start: number = jagged_block[0]['lnum']
+    var lnum_end: number = jagged_block[-1]['lnum']
     prop_clear(lnum_start, lnum_end, {
         bufnr: curbuf,
         type: 'JaggedBlock',
