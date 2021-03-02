@@ -33,8 +33,8 @@ def jaggedBlock#mapping() #{{{2
             # on  the  lines  in-between.   Remember that  the  selection  could
             # contain multibyte characters in arbitrary locations.
             #}}}
-            start_col: line->matchstr('.*\%' .. col1 .. 'v')->strlen() + 1,
-            end_col: line->matchstr('.*\%' .. col2 .. 'v')->strlen() + 1,
+            start_col: matchstr(line, '.*\%' .. col1 .. 'v')->strlen() + 1,
+            end_col: matchstr(line, '.*\%' .. col2 .. 'v')->strlen() + 1,
             }]
     endfor
     curbuf = bufnr('%')
@@ -209,7 +209,7 @@ def RemoveTrailingSpaces() #{{{2
     getreginfo('"')
         ->extend({
             regcontents: getreg('"', true, true)
-                            ->map((_, v: string): string => v->trim(' ', 2)),
+                       ->map((_, v: string): string => v->trim(' ', 2)),
             regtype: 'b1',
         })->setreg('"')
 enddef
@@ -225,10 +225,9 @@ enddef
 def GetJaggedBlock(): list<string> #{{{2
     return jagged_block
         ->mapnew((_, v: dict<number>): string =>
-            v.lnum
-            ->getline()
-            ->matchstr('\%' .. v.start_col .. 'c.*\%' .. v.end_col .. 'c.')
-            )
+                    v.lnum
+                    ->getline()
+                    ->matchstr('\%' .. v.start_col .. 'c.*\%' .. v.end_col .. 'c.'))
 enddef
 
 def PopupGetText(): string #{{{2
