@@ -10,7 +10,7 @@ Using vim-plug:
 
 ## Requirements
 
-Vim 8.2.2257 or higher.
+Vim 8.2.2324 or higher.
 
 ## Usage
 

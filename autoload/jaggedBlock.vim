@@ -17,24 +17,44 @@ var popup_bufnr: number
 
 # Interface {{{1
 def jaggedBlock#mapping() #{{{2
-    expand_backward = col('.') < col('v')
+    expand_backward = virtcol('.') < virtcol('v')
     exe "norm! \e"
     jagged_block = []
-    var col1: number = min([virtcol("'<"), virtcol("'>")])
-    var col2: number = max([virtcol("'<"), virtcol("'>")])
+    # Don't try to use `charcount()`.  It wouldn't work as expected if the lines
+    # contain multicells characters (like tabs).
+    var vcol1: number = min([virtcol("'<"), virtcol("'>")])
+    var vcol2: number = max([virtcol("'<"), virtcol("'>")])
+    var start_col: number
+    var end_col: number
     for lnum in range(line("'<"), line("'>"))
         var line: string = getline(lnum)
+        # We can't simply use `col("'<")` and `col("'>")`.{{{
+        #
+        # They match  valid columns  on the  first and last  line of  the visual
+        # selection, yes.   But they do  not necessarily match valid  columns on
+        # the  lines  in-between.  Remember  that  the  selection could  contain
+        # multibyte characters in arbitrary locations.
+        #}}}
+        # Don't include a character after `\%v`.{{{
+        #
+        #     start_col = matchstr(line, '.*\%' .. vcol1 .. 'v.')->strlen()
+        #                                                     ^
+        #                                                     ✘
+        #
+        # It wouldn't work as expected  when the first column contains multibyte
+        # characters.
+        #}}}
+        start_col = matchstr(line, '.*\%' .. vcol1 .. 'v')->strlen()
+        end_col = matchstr(line, '.*\%' .. vcol2 .. 'v')->strlen()
+        if start_col == 0 || end_col == 0
+            # trying to support this special case is too tricky
+            Error('the first and last columns must be occupied by single-cell characters only')
+            return
+        endif
         jagged_block += [{
             lnum: lnum,
-            # We can't simply use `col("'<")` and `col("'>")`.{{{
-            #
-            # They match valid columns on the  first and last line of the visual
-            # selection, yes.  But  they do not necessarily  match valid columns
-            # on  the  lines  in-between.   Remember that  the  selection  could
-            # contain multibyte characters in arbitrary locations.
-            #}}}
-            start_col: matchstr(line, '.*\%' .. col1 .. 'v')->strlen() + 1,
-            end_col: matchstr(line, '.*\%' .. col2 .. 'v')->strlen() + 1,
+            start_col: start_col + 1,
+            end_col: end_col + 1,
             }]
     endfor
     curbuf = bufnr('%')
@@ -251,6 +271,12 @@ def ClearJaggedBlock(reinstall_proptype = false, ...l: any) #{{{2
 enddef
 #}}}1
 # Utilities {{{1
+def Error(msg: string) #{{{2
+    echohl ErrorMsg
+    echom msg
+    echohl NONE
+enddef
+
 def LineInBlockLength(coords: dict<number>): number #{{{2
     return getline(coords.lnum)
         ->matchstr('\%' .. coords.start_col .. 'c.*\%' .. coords.end_col .. 'c.')
