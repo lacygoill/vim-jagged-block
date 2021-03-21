@@ -247,7 +247,7 @@ def GetJaggedBlock(): list<string> #{{{2
         ->mapnew((_, v: dict<number>): string =>
                     v.lnum
                     ->getline()
-                    ->matchstr('\%' .. v.start_col .. 'c.*\%' .. v.end_col .. 'c.'))
+                    ->strpart(v.start_col - 1, v.end_col - v.start_col + 1))
 enddef
 
 def PopupGetText(): string #{{{2
@@ -279,8 +279,8 @@ enddef
 
 def LineInBlockLength(coords: dict<number>): number #{{{2
     return getline(coords.lnum)
-        ->matchstr('\%' .. coords.start_col .. 'c.*\%' .. coords.end_col .. 'c.')
-        ->strchars(true)
+        ->strpart(coords.start_col - 1, coords.end_col - coords.start_col + 1)
+        ->strcharlen()
 enddef
 
 def PatToUpdateBlock(key: string, coords: dict<number>): string #{{{2
