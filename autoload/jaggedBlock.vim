@@ -17,13 +17,13 @@ var popup_bufnr: number
 
 # Interface {{{1
 def jaggedBlock#mapping() #{{{2
-    expand_backward = virtcol('.') < virtcol('v')
+    expand_backward = virtcol('v') > virtcol('.')
     exe "norm! \e"
     jagged_block = []
     # Don't try to use `charcount()`.  It wouldn't work as expected if the lines
     # contain multicells characters (like tabs).
-    var vcol1: number = min([virtcol("'<"), virtcol("'>")])
-    var vcol2: number = max([virtcol("'<"), virtcol("'>")])
+    var vcol1: number = min([VirtcolFirstCell("'<"), VirtcolFirstCell("'>")])
+    var vcol2: number = max([VirtcolFirstCell("'<"), VirtcolFirstCell("'>")])
     var start_col: number
     var end_col: number
     for lnum in range(line("'<"), line("'>"))
@@ -46,16 +46,11 @@ def jaggedBlock#mapping() #{{{2
         #}}}
         start_col = matchstr(line, '.*\%' .. vcol1 .. 'v')->strlen()
         end_col = matchstr(line, '.*\%' .. vcol2 .. 'v')->strlen()
-        if start_col == 0 || end_col == 0
-            # trying to support this special case is too tricky
-            Error('the first and last columns must be occupied by single-cell characters only')
-            return
-        endif
         jagged_block += [{
             lnum: lnum,
             start_col: start_col + 1,
             end_col: end_col + 1,
-            }]
+        }]
     endfor
     curbuf = bufnr('%')
     UpdateHighlighting()
@@ -82,7 +77,7 @@ def UpdateHighlighting(key = '') #{{{2
             type: 'JaggedBlock',
             length: coords.end_col - coords.start_col + 1,
             bufnr: curbuf,
-            })
+        })
     endfor
 enddef
 
@@ -254,29 +249,23 @@ def PopupGetText(): string #{{{2
     return SHOWMODE .. (exclusive ? '' : ' (inclusive)')
 enddef
 
-def ClearJaggedBlock(reinstall_proptype = false, ...l: any) #{{{2
+def ClearJaggedBlock(reinstall_proptype = false, ..._) #{{{2
     var lnum_start: number = jagged_block[0]['lnum']
     var lnum_end: number = jagged_block[-1]['lnum']
     prop_clear(lnum_start, lnum_end, {
         bufnr: curbuf,
         type: 'JaggedBlock',
-        })
+    })
     prop_type_delete('JaggedBlock', {bufnr: curbuf})
     if reinstall_proptype
         prop_type_add('JaggedBlock', {
             bufnr: curbuf,
-            highlight: 'Visual'
-            })
+            highlight: 'Visual',
+        })
     endif
 enddef
 #}}}1
 # Utilities {{{1
-def Error(msg: string) #{{{2
-    echohl ErrorMsg
-    echom msg
-    echohl NONE
-enddef
-
 def LineInBlockLength(coords: dict<number>): number #{{{2
     return getline(coords.lnum)
         ->strpart(coords.start_col - 1, coords.end_col - coords.start_col + 1)
@@ -292,7 +281,8 @@ def PatToUpdateBlock(key: string, coords: dict<number>): string #{{{2
         char = coords.lnum
             ->getline()
             ->strpart(0, coords.start_col - 1)[-1]
-        pat = '\%' .. coords.start_col .. 'c.\{-}' .. char
+
+        pat = '\%>' .. (coords.start_col - 1) .. 'c' .. char
             .. '\zs.*\%' .. coords.end_col .. 'c'
 
     # pattern to undo latest backward inclusive expansion
@@ -300,7 +290,7 @@ def PatToUpdateBlock(key: string, coords: dict<number>): string #{{{2
         char = coords.lnum
             ->getline()
             ->strpart(coords.start_col - 1)[0]
-        pat = '.*\%' .. coords.start_col .. 'c.\{-1,}' .. char
+        pat = '\%>' .. coords.start_col .. 'c' .. char
             .. '\zs.*\%' .. coords.end_col .. 'c'
 
     # pattern to undo latest forward expansion, excluding the pressed character
@@ -308,18 +298,18 @@ def PatToUpdateBlock(key: string, coords: dict<number>): string #{{{2
         char = coords.lnum
             ->getline()
             ->strpart(coords.end_col - 1)[1]
-        pat = '.*\%' .. coords.start_col .. 'c.*'
+        pat = '\%' .. coords.start_col .. 'c.*'
             .. '\ze.' .. char
-            .. '.\{-1,}\%' .. coords.end_col .. 'c'
+            .. '\%<' .. coords.end_col .. 'c'
 
     # pattern to undo latest forward expansion, including the pressed character
     elseif key == 'u' && !expand_backward && !exclusive
         char = coords.lnum
             ->getline()
             ->strpart(coords.end_col - 1)[0]
-        pat = '.*\%' .. coords.start_col .. 'c.*'
+        pat = '\%' .. coords.start_col .. 'c.*'
             .. char .. '\ze'
-            .. '.\{-1,}\%' .. coords.end_col .. 'c'
+            .. '\%<' .. coords.end_col .. 'c'
 
     # pattern to expand block back to previous occurrence of pressed character, excluding it
     elseif key != 'u' && expand_backward && exclusive
@@ -331,13 +321,16 @@ def PatToUpdateBlock(key: string, coords: dict<number>): string #{{{2
 
     # pattern to expand block up to next occurrence of pressed character, excluding it
     elseif key != 'u' && !expand_backward && exclusive
-        pat = '.*\%' .. coords.end_col .. 'c' .. '.\{-1,}\ze.' .. key
+        pat = '\%' .. coords.end_col .. 'c' .. '.\{-1,}\ze.' .. key
 
     # pattern to expand block up to next occurrence of pressed character, including it
     elseif key != 'u' && !expand_backward && !exclusive
-        pat = '.*\%' .. coords.end_col .. 'c' .. '.\{-1,}' .. key
+        pat = '\%' .. coords.end_col .. 'c' .. '.\{-1,}' .. key
     endif
 
     return pat
 enddef
 
+def VirtcolFirstCell(filepos: string): number #{{{2
+    return virtcol([line(filepos), col(filepos) - 1]) + 1
+enddef
