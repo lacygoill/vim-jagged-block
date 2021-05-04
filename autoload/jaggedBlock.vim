@@ -37,15 +37,15 @@ def jaggedBlock#mapping() #{{{2
         #}}}
         # Don't include a character after `\%v`.{{{
         #
-        #     start_col = matchstr(line, '.*\%' .. vcol1 .. 'v.')->strlen()
+        #     start_col = line->matchstr('.*\%' .. vcol1 .. 'v.')->strlen()
         #                                                     ^
         #                                                     ✘
         #
         # It wouldn't work as expected  when the first column contains multibyte
         # characters.
         #}}}
-        start_col = matchstr(line, '.*\%' .. vcol1 .. 'v')->strlen()
-        end_col = matchstr(line, '.*\%' .. vcol2 .. 'v')->strlen()
+        start_col = line->matchstr('.*\%' .. vcol1 .. 'v')->strlen()
+        end_col = line->matchstr('.*\%' .. vcol2 .. 'v')->strlen()
         jagged_block += [{
             lnum: lnum,
             start_col: start_col + 1,
@@ -96,7 +96,7 @@ def UpdateCoords(key: string) #{{{2
                     ->matchend(pat)
         endif
         if exclusive
-            n += 1
+            ++n
         endif
         if n <= 0
             continue
