@@ -133,7 +133,7 @@ def Filter(winid: number, key: string): bool #{{{2
             # installed later:
             #
             #     vim9script
-            #     setline(1, '')
+            #     ''->setline(1)
             #     au TextChanged * echom 'TextChanged was fired'
             #
             # We need to ignore this `TextChanged` event, and wait for the next
@@ -145,9 +145,9 @@ def Filter(winid: number, key: string): bool #{{{2
             # several times, the event is fired only once:
             #
             #     vim9script
-            #     setline(1, '')
-            #     setline(1, '')
-            #     setline(1, '')
+            #     ''->setline(1)
+            #     ''->setline(1)
+            #     ''->setline(1)
             #     au TextChanged * echom 'TextChanged was fired'
             #
             # ---

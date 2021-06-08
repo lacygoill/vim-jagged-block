@@ -17,7 +17,7 @@ xno <c-g><c-g> <cmd>call jaggedBlock#mapping()<cr>
 #         [ ]
 #         [ ]
 #     END
-#     setline(1, lines)
+#     lines->setline(1)
 #
 # Select a  jagged block,  using whatever  character (underscore,  plus, minus),
 # then try to paste it inside the square brackets column.
@@ -35,5 +35,5 @@ xno <c-g><c-g> <cmd>call jaggedBlock#mapping()<cr>
 #         [ ]
 #         [ ]
 #     END
-#     setline(1, lines)
+#     lines->setline(1)
 #}}}
