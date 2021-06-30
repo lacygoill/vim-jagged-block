@@ -18,7 +18,7 @@ var popup_bufnr: number
 # Interface {{{1
 def jaggedBlock#mapping() #{{{2
     expand_backward = virtcol('v') > virtcol('.')
-    exe "norm! \e"
+    execute "normal! \<Esc>"
     jagged_block = []
     # Don't try to use `charcount()`.  It wouldn't work as expected if the lines
     # contain multicells characters (like tabs).
@@ -134,7 +134,7 @@ def Filter(winid: number, key: string): bool #{{{2
             #
             #     vim9script
             #     ''->setline(1)
-            #     au TextChanged * echom 'TextChanged was fired'
+            #     autocmd TextChanged * echomsg 'TextChanged was fired'
             #
             # We need to ignore this `TextChanged` event, and wait for the next
             # one which will be fired when `feedkeys()` will have pressed `c` or `d`.
@@ -148,29 +148,29 @@ def Filter(winid: number, key: string): bool #{{{2
             #     ''->setline(1)
             #     ''->setline(1)
             #     ''->setline(1)
-            #     au TextChanged * echom 'TextChanged was fired'
+            #     autocmd TextChanged * echomsg 'TextChanged was fired'
             #
             # ---
             #
             # It's not a Vim9 bug.
-            # It's not specific to `setline()` (can also be reproduced with `:norm! ii`).
-            # `:noa` does not suppress the event here.
+            # It's  not specific  to `setline()`  (can also  be reproduced  with
+            # `:normal! ii`). `:noautocmd` does not suppress the event here.
             #}}}
-            au TextChanged * ++once au TextChanged * ++once RemoveHeadingSpaces()
+            autocmd TextChanged * ++once autocmd TextChanged * ++once RemoveHeadingSpaces()
         else
             # Similar issue if we've expanded forward.{{{
             #
             # Except  that this  time, the  extra  spaces don't  persist in  the
             # buffer, they end up in the unnamed register.
             #}}}
-            au TextChanged * ++once au TextChanged * ++once RemoveTrailingSpaces()
+            autocmd TextChanged * ++once autocmd TextChanged * ++once RemoveTrailingSpaces()
         endif
         feedkeys(key, 'in')
         return true
     # if we press `v`, `V` or `C-v` we should leave the submode, and enter visual mode
-    elseif index(['v', 'V', "\<c-v>"], key) >= 0
+    elseif index(['v', 'V', "\<C-V>"], key) >= 0
         popup_close(winid)
-    elseif key == "\<c-x>"
+    elseif key == "\<C-X>"
         exclusive = !exclusive
         popup_settext(winid, PopupGetText())
     elseif key =~ '^\p$'
@@ -198,10 +198,10 @@ def EqualizeBlock() #{{{2
         var lnum: number = jagged_block[0]['lnum']
         var col: number = jagged_block[0]['end_col'] + longest - shortest
         cursor(lnum, col)
-        exe "norm! \<c-v>"
+        execute "normal! \<C-V>"
         lnum = jagged_block[-1]['lnum']
         cursor(lnum, col)
-        exe 'norm! ' .. (longest == 1 ? '' : (longest - 1) .. 'h')
+        execute 'normal! ' .. (longest == 1 ? '' : (longest - 1) .. 'h')
     else
         for coords in jagged_block
             var n: number = longest - LineInBlockLength(coords)
@@ -213,10 +213,10 @@ def EqualizeBlock() #{{{2
         var lnum: number = jagged_block[0]['lnum']
         var col: number = jagged_block[0]['start_col']
         cursor(lnum, col)
-        exe "norm! \<c-v>"
+        execute "normal! \<C-V>"
         lnum = jagged_block[-1]['lnum']
         cursor(lnum, col)
-        exe 'norm! ' .. (longest == 1 ? '' : (longest - 1) .. 'l')
+        execute 'normal! ' .. (longest == 1 ? '' : (longest - 1) .. 'l')
     endif
 enddef
 
