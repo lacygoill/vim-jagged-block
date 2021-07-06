@@ -3,7 +3,7 @@ vim9script noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
-xnoremap <C-G><C-G> <Cmd>call jaggedBlock#mapping()<CR>
+xnoremap <unique> <C-G><C-G> <Cmd>call jaggedBlock#mapping()<CR>
 
 # TODO: Write tests.{{{
 #

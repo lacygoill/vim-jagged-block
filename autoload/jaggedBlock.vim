@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 # Config {{{1
 
 const SHOWMODE: string = '-- VISUAL JAGGED BLOCK --'
@@ -132,9 +129,9 @@ def Filter(winid: number, key: string): bool #{{{2
             # causes  `TextChanged` to  be  fired, even  though  the autocmd  is
             # installed later:
             #
-            #     vim9script
             #     ''->setline(1)
             #     autocmd TextChanged * echomsg 'TextChanged was fired'
+            #     TextChanged was fired˜
             #
             # We need to ignore this `TextChanged` event, and wait for the next
             # one which will be fired when `feedkeys()` will have pressed `c` or `d`.
@@ -144,11 +141,11 @@ def Filter(winid: number, key: string): bool #{{{2
             # Note  that it  doesn't matter  that `setline()`  might be  invoked
             # several times, the event is fired only once:
             #
-            #     vim9script
             #     ''->setline(1)
             #     ''->setline(1)
             #     ''->setline(1)
             #     autocmd TextChanged * echomsg 'TextChanged was fired'
+            #     TextChanged was fired˜
             #
             # ---
             #
@@ -224,7 +221,7 @@ def RemoveTrailingSpaces() #{{{2
     getreginfo('"')
         ->extend({
             regcontents: getreg('"', true, true)
-                       ->map((_, v: string): string => v->trim(' ', 2)),
+                       ->map((_, v: string) => v->trim(' ', 2)),
             regtype: 'b1',
         })->setreg('"')
 enddef
