@@ -23,7 +23,7 @@ def jaggedBlock#mapping() #{{{2
     var vcol2: number = max([VirtcolFirstCell("'<"), VirtcolFirstCell("'>")])
     var start_col: number
     var end_col: number
-    for lnum in range(line("'<"), line("'>"))
+    for lnum: number in range(line("'<"), line("'>"))
         var line: string = getline(lnum)
         # We can't simply use `col("'<")` and `col("'>")`.{{{
         #
@@ -69,7 +69,7 @@ def UpdateHighlighting(key = '') #{{{2
     if key != ''
         UpdateCoords(key)
     endif
-    for coords in jagged_block
+    for coords: dict<number> in jagged_block
         prop_add(coords.lnum, coords.start_col, {
             type: 'JaggedBlock',
             length: coords.end_col - coords.start_col + 1,
@@ -81,7 +81,7 @@ enddef
 def UpdateCoords(key: string) #{{{2
     var pat: string
     var n: number
-    for coords in jagged_block
+    for coords: dict<number> in jagged_block
         pat = PatToUpdateBlock(key, coords)
         if expand_backward
             n = coords.lnum
@@ -186,7 +186,7 @@ def EqualizeBlock() #{{{2
         ->max()
     if expand_backward
         var n: number = longest - shortest
-        for coords in jagged_block
+        for coords: dict<number> in jagged_block
             var pat: string = '\%' .. coords.start_col .. 'c'
             getline(coords.lnum)
                 ->substitute(pat, repeat(' ', n), '')
@@ -200,7 +200,7 @@ def EqualizeBlock() #{{{2
         cursor(lnum, col)
         execute 'normal! ' .. (longest == 1 ? '' : (longest - 1) .. 'h')
     else
-        for coords in jagged_block
+        for coords: dict<number> in jagged_block
             var n: number = longest - LineInBlockLength(coords)
             var pat: string = '\%' .. coords.end_col .. 'c.\zs'
             getline(coords.lnum)
@@ -227,7 +227,7 @@ def RemoveTrailingSpaces() #{{{2
 enddef
 
 def RemoveHeadingSpaces() #{{{2
-    for coords in jagged_block
+    for coords: dict<number> in jagged_block
         getline(coords.lnum)
             ->substitute('\%' .. coords.start_col .. 'c\s\+', '', '')
             ->setline(coords.lnum)
